@@ -50,9 +50,12 @@ if __name__ == '__main__':
     hist_diff_nob_1 = np.zeros(bc.size, dtype=np.int64)
 
     for i in range(nfiles):
-        _file_0 = rf'/Volumes/LaCie/lorentz_force/sphere_20250708/20250808_2e-8mbar_midfreq/20250808_m350e_276khz_350vpp_withb_{i}.hdf5'
-        _file_1 = rf'/Volumes/LaCie/lorentz_force/sphere_20250708/20250808_2e-8mbar_midfreq/20250808_m350e_276khz_350vpp_withb_flipped_{i}.hdf5'
-        _file_n = rf'/Volumes/LaCie/lorentz_force/sphere_20250708/20250808_2e-8mbar_midfreq/20250808_m350e_276khz_350vpp_nob_{i}.hdf5'
+        if i % 100 == 0:
+            print(i)
+
+        _file_0 = rf"E:\lorentz_force\sphere_20250708\20250808_2e-8mbar_midfreq\20250808_m350e_276khz_350vpp_withb_{i}.hdf5"
+        _file_1 = rf"E:\lorentz_force\sphere_20250708\20250808_2e-8mbar_midfreq\20250808_m350e_276khz_350vpp_withb_flipped_{i}.hdf5"
+        _file_n = rf"E:\lorentz_force\sphere_20250708\20250808_2e-8mbar_midfreq\20250808_m350e_276khz_350vpp_nob_{i}.hdf5"
 
         # Read in timestreams (positive, negative, no B field)
         attrs, tts = utils.get_timestreams(file=_file_0, channels=['d', 'g'], attrs=['delta_t'])
@@ -87,6 +90,7 @@ if __name__ == '__main__':
 
         if (i+1) % 500 == 0:
             # Save histograms and re-initiate
+            print(f'Saving file {f"hist_diff_{i-499}_{i}.npz"}')
             np.savez(f'hists_processed/hist_diff_{i-499}_{i}.npz', be=be, hist=hist_diff)
             np.savez(f'hists_processed/hist_diff_nob_pos_{i-499}_{i}.npz', be=be, hist=hist_diff_nob_0)
             np.savez(f'hists_processed/hist_diff_nob_neg_{i-499}_{i}.npz', be=be, hist=hist_diff_nob_1)
