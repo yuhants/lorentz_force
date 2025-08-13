@@ -36,6 +36,7 @@ def get_eb_comp(dt, zz, gg, sos_filt=None):
     return ee, bb
 
 if __name__ == '__main__':
+    nstart = 2000
     nfiles = 100000
 
     fs   = 1250000
@@ -49,7 +50,7 @@ if __name__ == '__main__':
     hist_diff_nob_0 = np.zeros(bc.size, dtype=np.int64)
     hist_diff_nob_1 = np.zeros(bc.size, dtype=np.int64)
 
-    for i in range(nfiles):
+    for i in range(nstart, nfiles):
         if i % 100 == 0:
             print(i)
 
