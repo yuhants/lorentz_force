@@ -5,6 +5,7 @@ import h5py
 from cycler import cycler
 
 from scipy.signal import welch
+from scipy.signal import butter, sosfilt
 
 def load_plotting_setting():
     cmap = plt.colormaps.get_cmap('viridis')
@@ -139,3 +140,40 @@ def get_c_mv(data_files_ordered, vp2p, omegad, passband, charge=3, n_chunk=10, e
         return c_mvs, ffss, ppss
 
     return c_mvs
+
+
+def demodulate(_sig, _lo, f_samp, f_lp, sos_filt=None):
+    mixed_sig = _sig * _lo
+
+    if sos_filt is None:
+        sos_filt = butter(N=8, Wn=f_lp, btype='lowpass', output='sos', fs=f_samp)
+    filtered = sosfilt(sos_filt, mixed_sig)
+    
+    return filtered
+
+def get_eb_comp(dt, zz, gg, sos_filt=None):
+    fs = int(1 / dt)  # Sample frequency
+
+    ee = demodulate(zz, gg, fs, 10, sos_filt)
+    bb = demodulate(zz, np.gradient(gg), fs, 10, sos_filt)
+
+    return ee, bb
+
+def normalized_drive(sig_drive):
+    """Normalized the drive signal to have amplitude 1"""
+    mean = np.mean(sig_drive[0:10000])
+    amp = np.max(np.abs(sig_drive[0:10000] - mean))
+    return (sig_drive-mean) / amp
+
+def get_diff_newton_nocorr(bb_0, bb_1, lockin_2_newton):
+    _diff = (bb_0 - bb_1) * lockin_2_newton
+
+    return _diff[1000000:]
+
+def get_diff_newton(ee_0, bb_0, ee_1, bb_1, lockin_2_newton):
+    amp = 0.5 * (np.mean(ee_0[1000000:]) + np.mean(ee_1[1000000:]))
+    _diff = (bb_0/np.mean(ee_0[1000000:]) - bb_1/np.mean(ee_1[1000000:])) * lockin_2_newton * amp
+
+    # _diff = (bb_0/ee_0 - bb_1/ee_1) * lockin_2_newton * amp
+
+    return _diff[1000000:]
